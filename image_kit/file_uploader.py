@@ -7,8 +7,8 @@ def upload_image(image, name):
         public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
         url_endpoint='https://ik.imagekit.io/it41uxh5d'
     )
-    upload = imagekit.upload(
-        file=open(image, "rb"),
+    upload = imagekit.upload_file(
+        file=image,
         file_name=name,
         options={
             "response_fields": ["is_private_file", "tags"],
@@ -27,6 +27,6 @@ def upload_image(image, name):
 
     print("Upload response", upload['response'])
 
-    downloadURL = upload['response']['url']
+    download_url = upload['response']['url']
 
-    return downloadURL;
+    return download_url
