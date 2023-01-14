@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify
+from aioflask import Flask, request, jsonify
 from utils.image_validator import visual_validate_image
-
+import asyncio
 app = Flask(__name__)
 
 
@@ -10,7 +10,7 @@ def welcome():
 
 
 @app.route('/visual-validate', methods=['POST'])
-def upload_file_for_visual_validation():
+async def upload_file_for_visual_validation():
     file = request.files['file']
     file_tag = request.form['tag']
 
@@ -19,7 +19,7 @@ def upload_file_for_visual_validation():
         resp.status_code = 400
         return resp
     if file and allowed_file(file.filename):
-        download_url = visual_validate_image(file, file_tag)
+        download_url = await visual_validate_image(file, file_tag)
         return jsonify({'message': 'File uploaded successfully', 'downloadURL': download_url})
     else:
         resp = jsonify({'message': 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})

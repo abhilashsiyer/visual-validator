@@ -1,5 +1,6 @@
 from imagekitio import ImageKit
-
+import asyncio
+import time
 
 def get_file_url(tag_name):
     imagekit = ImageKit(
@@ -19,5 +20,18 @@ def get_file_url(tag_name):
         url = list_files['response'][0]['url']
         return url
 
-# res = get_file_url("qantas_base")
-# print(res)
+
+async def delete_existing_file(tag_name):
+    imagekit = ImageKit(
+        private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',
+        public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
+        url_endpoint='https://ik.imagekit.io/it41uxh5d'
+    )
+    list_files = imagekit.list_files({"tags": ["tag-" + tag_name]})
+    response = list_files['response']
+
+    if len(response) != 0:
+        file_id = list_files['response'][0]['fileId']
+        result = imagekit.delete_file(file_id=file_id)
+        return result
+        # handle if length is more than 1
