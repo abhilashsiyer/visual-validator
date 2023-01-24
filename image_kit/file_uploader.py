@@ -1,32 +1,29 @@
 from imagekitio import ImageKit
+from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 
 
-def upload_image(image, name):
+def upload_image(image, file_tag, project, branch_name, test_matrix_id="default"):
     imagekit = ImageKit(
         private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',
         public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
         url_endpoint='https://ik.imagekit.io/it41uxh5d'
     )
-    upload = imagekit.upload_file(
-        file=image,
-        file_name=name,
-        options={
-            "response_fields": ["is_private_file", "tags"],
-            "tags": ["tag-"+name]
-        },
+
+    options = UploadFileRequestOptions(
+        response_fields=["is_private_file", "tags"],
+        tags=[file_tag, project, branch_name, test_matrix_id]
     )
 
-    # upload = imagekit.upload(
-    #     file=open("Q_Galaxy.png", "rb"),
-    #     file_name="Q_Galaxy.jpg",
-    #     options={
-    #         "response_fields": ["is_private_file", "tags"],
-    #         "tags": ["tag1", "tag2"]
-    #     },
-    # )
+    upload = imagekit.upload_file(
+        file=image,
+        file_name=file_tag+project+branch_name,
+        options=options
+    )
 
-    print("Upload response", upload['response'])
+    raw_response = upload.response_metadata.raw
 
-    download_url = upload['response']['url']
+    print("Upload response", upload.response_metadata.raw)
+
+    download_url = raw_response['url']
 
     return download_url
