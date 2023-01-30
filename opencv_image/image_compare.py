@@ -30,8 +30,7 @@ def validate_image(file_url_as_base, file_url_for_compare):
     print("SSIM: {}".format(score))
 
     if score == 1.0:
-        return {'message': 'Validation successful with base', "validation_result": True,
-                'baseImage': file_url_as_base}
+        return {"message": "Validation successful with base", "validationResult": "True"}
     else:
         thresh = cv2.threshold(diff, 0, 255,
                                cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -59,12 +58,10 @@ def validate_image(file_url_as_base, file_url_for_compare):
     else:
         print("The file does not exist")
 
-    return {'message': 'Validation failed with base', "validationResult": False,
-            'imageDiffResult': download_url, 'baseImage': file_url_as_base}
+    return {"message": "Validation failed with base", "validationResult": "False"}
 
 
 def url_to_image(url):
     image = io.imread(url)
     image_bgr = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image_bgr
-
