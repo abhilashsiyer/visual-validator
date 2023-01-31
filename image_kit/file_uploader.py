@@ -2,7 +2,7 @@ from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 
 
-def upload_image(image, file_tag, project, branch_name, test_case_name, test_matrix_id="default"):
+def upload_image(image, file_tag, project, branch_name, test_case_name, device_model, test_matrix_id="default"):
     imagekit = ImageKit(
         private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',
         public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
@@ -11,12 +11,12 @@ def upload_image(image, file_tag, project, branch_name, test_case_name, test_mat
 
     options = UploadFileRequestOptions(
         response_fields=["is_private_file", "tags"],
-        tags=[file_tag, project, branch_name, test_matrix_id, test_case_name]
+        tags=[file_tag, project, branch_name, test_matrix_id, test_case_name, device_model]
     )
 
     upload = imagekit.upload_file(
         file=image,
-        file_name=file_tag+project+branch_name+test_case_name+test_matrix_id,
+        file_name=file_tag+project+branch_name+test_case_name+device_model+test_matrix_id,
         options=options
     )
 

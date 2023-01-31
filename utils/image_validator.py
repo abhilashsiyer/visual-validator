@@ -10,13 +10,16 @@ from opencv_image.image_compare import validate_image
 # On failure give
 
 
-def visual_validate_image(file, base_file_url, file_tag, project, branch_name, test_matrix_id, test_case_name):
+def visual_validate_image(file, base_file_url, file_tag, project, branch_name, test_matrix_id, test_case_name,
+                          device_model):
     base_url_exists: bool = False
+
+    print("start validation")
 
     if "https://ik.imagekit.io" in base_file_url:
         base_url_exists = True
 
-    if "False" in base_file_url:
+    if "Failed" in base_file_url:
         base_url_exists = False
 
     if base_url_exists:
@@ -25,35 +28,42 @@ def visual_validate_image(file, base_file_url, file_tag, project, branch_name, t
 
         image_to_compare_url = upload_image(file, "to_compare-" + file_tag, "project-" + project,
                                             "branch-" + branch_name, "testCaseName-" + test_case_name,
-                                            "testMatrixId-" + test_matrix_id)
+                                            "deviceModel-" + device_model, "testMatrixId-" + test_matrix_id)
+        # get_file_url("base-" + file_tag, "project-" + project, "branch-" + branch_name,
+        #              "testCaseName-" + test_case_name)
+        base_branch_file_url = "Blah"
+        print("image upload completed")
 
-        base_branch_file_url = get_file_url("base-" + file_tag, "project-" + project, "branch-" + branch_name,
-                                            "testCaseName-" + test_case_name)
-
-        if "https://ik.imagekit.io" in base_branch_file_url:
-            base_branch_url_exists = True
-
-        if "False" in base_branch_file_url:
-            base_branch_url_exists = False
+        # if "https://ik.imagekit.io" in base_branch_file_url:
+        #     base_branch_url_exists = True
+        #
+        # if "Failed" in base_branch_file_url:
+        #     base_branch_url_exists = False
 
         print("baseBranchURl", base_branch_file_url)
 
-        if base_branch_url_exists:
-            response = validate_image(base_branch_file_url, image_to_compare_url)
-            return response
-        else:
-            response = validate_image(base_file_url, image_to_compare_url)
-            return response
+        response = validate_image(base_file_url, image_to_compare_url)
+
+        print('validation completed')
+
+        return response
+
+        # if base_branch_url_exists:
+        #     response = validate_image(base_branch_file_url, image_to_compare_url)
+        #     return response
+        # else:
+        #
+        #     return response
     else:
-        url = upload_image(file, "base-" + file_tag, "project-" + project, "branch-main", "testCaseName-"
-                           + test_case_name)
-        return {'message': 'File uploaded as base', "validationResult": "true"}
+        upload_image(file, "base-" + file_tag, "project-" + project, "branch-main", "testCaseName-"
+                           + test_case_name, "deviceModel-" + device_model)
+        return {"message": "File uploaded as base", "validationResult": "Success"}
 
 
-def get_base_file_url(file_tag, project, test_case_name):
-    base_file_url = get_file_url("base-" + file_tag, "project-" + project, "branch-main",
-                                 "testCaseName-" + test_case_name)
-    return {"baseFileUrl": base_file_url}
+def get_base_file_url(file_tag, project, test_case_name, device_model, branch):
+    base_file_url = get_file_url("base-" + file_tag, "project-" + project, "branch-"+branch,
+                                 "testCaseName-" + test_case_name, "deviceModel-" + device_model)
+    return base_file_url
 
 
 def delete_to_compare_file(file_tag, project, branch_name, test_matrix_id, test_case_name):

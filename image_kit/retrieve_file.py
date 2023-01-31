@@ -1,9 +1,11 @@
+import string
+
 from imagekitio import ImageKit
 from imagekitio.models.ListAndSearchFileRequestOptions import ListAndSearchFileRequestOptions
 import json
 
 
-def get_file_url(file_tag, project, branch_name, test_case_name):
+def get_file_url(file_tag, project, branch_name, test_case_name, device_model):
     imagekit = ImageKit(
         private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',
         public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
@@ -25,15 +27,17 @@ def get_file_url(file_tag, project, branch_name, test_case_name):
     filtered_list = []
     for dictionary in a_list:
         if branch_name in dictionary['tags'] and project in dictionary['tags'] and file_tag in dictionary['tags'] \
-                and test_case_name in dictionary['tags']:
+                and test_case_name in dictionary['tags'] and device_model in dictionary['tags']:
             filtered_list.append(dictionary)
 
     print('filtered_list', filtered_list)
 
     if filtered_list:
+        print("Filtered list present", filtered_list[0]['url'])
         return filtered_list[0]['url']
     else:
-        return "False"
+        print("No Filtered list present")
+        return "Failed"
 
 
 def get_file_id(file_tag, project, branch_name, test_case_name):

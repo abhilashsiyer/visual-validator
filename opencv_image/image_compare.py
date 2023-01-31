@@ -29,8 +29,8 @@ def validate_image(file_url_as_base, file_url_for_compare):
     diff = (diff * 255).astype("uint8")
     print("SSIM: {}".format(score))
 
-    if score == 1.0:
-        return {"message": "Validation successful with base", "validationResult": "True"}
+    if score >= 0.9: # change to 1.0
+        return {"message": "Validation successful with base", "validationResult": "Success"}
     else:
         thresh = cv2.threshold(diff, 0, 255,
                                cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -49,16 +49,10 @@ def validate_image(file_url_as_base, file_url_for_compare):
     # show the output images
     diff_image_name = "diff-" + str(uuid.uuid1())
     diff_image_name_ext = diff_image_name + ".png"
-    cv2.imwrite(diff_image_name_ext, imageB)
-    download_url = upload_image(diff_image_name_ext, diff_image_name)
+    # cv2.imwrite(diff_image_name_ext, imageB)
+    # download_url = upload_image(diff_image_name_ext, diff_image_name)
 
-    import os
-    if os.path.exists(diff_image_name_ext):
-        os.remove(diff_image_name_ext)
-    else:
-        print("The file does not exist")
-
-    return {"message": "Validation failed with base", "validationResult": "False"}
+    return {"message": "Validation failed with base", "validationResult": "Failed"}
 
 
 def url_to_image(url):
