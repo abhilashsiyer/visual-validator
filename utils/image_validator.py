@@ -1,6 +1,6 @@
 from image_kit.delete_file import delete_file
 from image_kit.file_uploader import upload_image
-from image_kit.retrieve_file import get_file_url, delete_compare_file_if_existing, get_file_id
+from image_kit.retrieve_file import get_file_url, delete_compare_file_if_existing, get_file_id, get_file_ui_for_testcase
 from image_kit.update_tags import add_tag, remove_tag
 from opencv_image.image_compare import validate_image
 
@@ -56,13 +56,21 @@ def visual_validate_image(file, base_file_url, file_tag, project, branch_name, t
         #     return response
     else:
         upload_image(file, "base-" + file_tag, "project-" + project, "branch-main", "testCaseName-"
-                           + test_case_name, "deviceModel-" + device_model)
+                     + test_case_name, "deviceModel-" + device_model)
         return {"message": "File uploaded as base", "validationResult": "Success"}
 
 
 def get_base_file_url(file_tag, project, test_case_name, device_model, branch):
-    base_file_url = get_file_url("base-" + file_tag, "project-" + project, "branch-"+branch,
+    base_file_url = get_file_url("base-" + file_tag, "project-" + project, "branch-" + branch,
                                  "testCaseName-" + test_case_name, "deviceModel-" + device_model)
+    return base_file_url
+
+
+# Used in UI
+def get_file_urls_for_testcase( project, test_case_name, device_model, test_matrix_id):
+    base_file_url = get_file_ui_for_testcase("project-" + project,
+                                 "testCaseName-" + test_case_name, "deviceModel-" + device_model,
+                                "testMatrixId-" + test_matrix_id)
     return base_file_url
 
 

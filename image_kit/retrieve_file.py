@@ -40,6 +40,43 @@ def get_file_url(file_tag, project, branch_name, test_case_name, device_model):
         return "Failed"
 
 
+def get_file_ui_for_testcase( project, test_case_name, device_model, test_matrix_id):
+    imagekit = ImageKit(
+        private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',
+        public_key='public_T79KXeQeARDMxvGEm70zJ2Zk6FY=',
+        url_endpoint='https://ik.imagekit.io/it41uxh5d'
+    )
+
+    print(project, device_model, test_case_name, test_matrix_id)
+
+    options = ListAndSearchFileRequestOptions(
+        tags=[project, device_model, test_case_name, test_matrix_id]
+    )
+
+    list_files = imagekit.list_files(options=options)
+    raw_response = list_files.response_metadata.raw
+    print("raw_response", raw_response)
+
+    json_array = json.dumps(raw_response)
+    a_list = json.loads(json_array)
+    filtered_list = []
+    for dictionary in a_list:
+        if project in dictionary['tags'] and test_case_name in dictionary['tags'] and device_model in dictionary['tags'] \
+                and test_matrix_id in dictionary['tags']:
+            filtered_list.append(dictionary)
+
+    print('filtered_list', filtered_list)
+
+    return filtered_list
+
+    # if filtered_list:
+    #     print("Filtered list present", filtered_list[0]['url'])
+    #     return filtered_list[0]['url']
+    # else:
+    #     print("No Filtered list present")
+    #     return "Failed"
+
+
 def get_file_id(file_tag, project, branch_name, test_case_name):
     imagekit = ImageKit(
         private_key='private_Gufvw5TqIpJXCHLXsflAmIhjsJU=',

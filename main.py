@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from utils.image_validator import visual_validate_image, get_base_file_url, delete_to_compare_file, \
-    upload_base_branch_file, update_main_with_base_branch
+    upload_base_branch_file, update_main_with_base_branch, get_file_urls_for_testcase
 import base64
 import json
 
@@ -88,6 +88,56 @@ def get_base_file():
     else:
         print("Base branch url found")
         return jsonify({'baseFileUrl': base_branch_file_url})
+
+
+# For UI
+@app.route('/get_validation_file_url/', methods=['POST'])
+def get_file_url():
+    # tag = request.form['tag']
+    project = request.form['project']
+    test_case_name = request.form['testCaseName']
+    device_model = request.form['deviceModel']
+    test_matrix_id = request.form['testMatrixId']
+    # branch = request.form['branch']
+
+    base_files = get_file_urls_for_testcase(project, test_case_name, device_model, "default")
+    json_array = json.dumps(base_files)
+    a_list = json.loads(json_array)
+
+    main_filtered_list = []
+    branch_filtered_list = []
+    branchName = "None"
+    for dictionary in a_list:
+        if "branch-main" in dictionary['tags']:
+            main_filtered_list.append(dictionary)
+        else:
+            tags = dictionary['tags']
+            print("tags", tags)
+            for tag in tags:
+                if tag.startswith("branch-"):
+                    branchName = tag.split("branch-")[0]
+                    break
+            branch_filtered_list.append({'branchName': branchName, 'branch_base_url': dictionary})
+
+    if main_filtered_list:
+        main_base_url = main_filtered_list[0]
+    else:
+        main_base_url = "None"
+
+    if branch_filtered_list:
+        branch_base_url = branch_filtered_list
+    else:
+        branch_base_url = "None"
+
+    to_compare_files = get_file_urls_for_testcase(project, test_case_name, device_model, test_matrix_id)
+
+    if to_compare_files:
+        to_compare_run_files = to_compare_files
+    else:
+        to_compare_run_files = "None"
+
+    return jsonify({'mainBaseFileUrl': main_base_url, 'branchBaseFileUrl': branch_base_url,
+                    "to_compare_run_files": to_compare_run_files})
 
 
 @app.route('/update_main_with_base_branch/', methods=['POST'])
