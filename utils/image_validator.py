@@ -11,10 +11,10 @@ from opencv_image.image_compare import validate_image
 
 
 def visual_validate_image(file, base_file_url, file_tag, project, branch_name, test_matrix_id, test_case_name,
-                          device_model):
+                          device_model, status_bar_height, display_height, display_width):
     base_url_exists: bool = False
 
-    print("start validation")
+    print("base_file_url", base_file_url)
 
     if "https://ik.imagekit.io" in base_file_url:
         base_url_exists = True
@@ -31,6 +31,7 @@ def visual_validate_image(file, base_file_url, file_tag, project, branch_name, t
                                             "deviceModel-" + device_model, "testMatrixId-" + test_matrix_id)
         # get_file_url("base-" + file_tag, "project-" + project, "branch-" + branch_name,
         #              "testCaseName-" + test_case_name)
+        print("image_to_compare_url", image_to_compare_url)
         base_branch_file_url = "Blah"
         print("image upload completed")
 
@@ -42,7 +43,10 @@ def visual_validate_image(file, base_file_url, file_tag, project, branch_name, t
 
         print("baseBranchURl", base_branch_file_url)
 
-        response = validate_image(base_file_url, image_to_compare_url)
+        response = validate_image(base_file_url, image_to_compare_url, status_bar_height, display_height, display_width,
+                                  "base-" + file_tag, "project-" + project, "branch-main",
+                                  "testCaseName-"+ test_case_name, "deviceModel-" + device_model,
+                                  "testMatrixId-" + test_matrix_id)
 
         print('validation completed')
 

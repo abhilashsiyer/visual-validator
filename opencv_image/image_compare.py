@@ -4,24 +4,28 @@ import cv2
 import imutils
 from skimage import io
 from skimage import metrics
+import base64
 
 from image_kit.file_uploader import upload_image
 
 
-def validate_image(file_url_as_base, file_url_for_compare):
+def validate_image(file_url_as_base, file_url_for_compare, status_bar_height, display_height, display_width,
+                   file_tag, project, branch_name, test_case_name, device_model, test_matrix_id):
     # load the two input images
     imageA = url_to_image(file_url_as_base)
     imageB = url_to_image(file_url_for_compare)
 
+    print("Values dimensions", status_bar_height, display_height, display_width)
+
+    croppedImageA = imageA[int(status_bar_height):int(display_height), 0:int(display_width)]
+    croppedImageB = imageB[int(status_bar_height):int(display_height), 0:int(display_width)]
+
     # Match size of both images
     # Get height and width of imageA
-    height = int(imageA.shape[0])
-    width = int(imageA.shape[1])
-    dim = (width, height)
 
     # convert the images to grayscale
-    grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
-    grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
+    grayA = cv2.cvtColor(croppedImageA, cv2.COLOR_BGR2GRAY)
+    grayB = cv2.cvtColor(croppedImageB, cv2.COLOR_BGR2GRAY)
 
     # compute the Structural Similarity Index (SSIM) between the two
     # images, ensuring that the difference image is returned
@@ -29,7 +33,7 @@ def validate_image(file_url_as_base, file_url_for_compare):
     diff = (diff * 255).astype("uint8")
     print("SSIM: {}".format(score))
 
-    if score >= 0.9: # change to 1.0
+    if score >= 1.0:  # change to 1.0
         return {"message": "Validation successful with base", "validationResult": "Success"}
     else:
         thresh = cv2.threshold(diff, 0, 255,
@@ -44,15 +48,18 @@ def validate_image(file_url_as_base, file_url_for_compare):
             # bounding box on both input images to represent where the two
             # images differ
             (x, y, w, h) = cv2.boundingRect(c)
-            cv2.rectangle(imageA, (x, y), (x + w, y + h), (0, 0, 255), 2)
-            cv2.rectangle(imageB, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    # show the output images
-    diff_image_name = "diff-" + str(uuid.uuid1())
-    diff_image_name_ext = diff_image_name + ".png"
-    # cv2.imwrite(diff_image_name_ext, imageB)
-    # download_url = upload_image(diff_image_name_ext, diff_image_name)
+            cv2.rectangle(croppedImageA, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            cv2.rectangle(croppedImageB, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-    return {"message": "Validation failed with base", "validationResult": "Failed"}
+    retval, buffer = cv2.imencode('.png', croppedImageB)
+    print('retval', retval)
+    png_as_b64 = base64.b64encode(buffer)
+
+    download_url = upload_image(png_as_b64, "result-" + file_tag, "project-" + project,
+                                "branch-" + branch_name, "testCaseName-" + test_case_name,
+                                "deviceModel-" + device_model, "testMatrixId-" + test_matrix_id)
+
+    return {"message": "Validation failed with base", "validationResult": "Failed", "diffImageUrl": download_url}
 
 
 def url_to_image(url):

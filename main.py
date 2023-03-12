@@ -4,8 +4,6 @@ from utils.image_validator import visual_validate_image, get_base_file_url, dele
 import base64
 import json
 
-# !pip install flask flask-restful
-
 app = Flask(__name__)
 
 
@@ -25,6 +23,9 @@ def upload_file_for_visual_validation():
     test_case_name = request.form['testCaseName']
     base_file_url = request.form['baseFileUrl']
     device_model = request.form['deviceModel']
+    status_bar_height = request.form['statusBarHeight']
+    display_height = request.form['displayHeight']
+    display_width = request.form['displayWidth']
 
     if 'file' not in request.files:
         resp = jsonify({'message': 'No file part in the request'})
@@ -32,7 +33,8 @@ def upload_file_for_visual_validation():
         return resp
     if file and allowed_file(file.filename):
         validation_resp = visual_validate_image(image_string, base_file_url, tag, project, branch_name, test_matrix_id,
-                                                test_case_name, device_model)
+                                                test_case_name, device_model, status_bar_height, display_height,
+                                                display_width)
         print("validation_resp", validation_resp)
         return validation_resp
     else:
@@ -101,6 +103,7 @@ def get_file_url():
     # branch = request.form['branch']
 
     base_files = get_file_urls_for_testcase(project, test_case_name, device_model, "default")
+    print('base_files', base_files)
     json_array = json.dumps(base_files)
     a_list = json.loads(json_array)
 
