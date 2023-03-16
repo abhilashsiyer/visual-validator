@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from utils.image_validator import visual_validate_image, get_base_file_url, delete_to_compare_file, \
-    upload_base_branch_file, update_main_with_base_branch, get_file_urls_for_testcase
+    upload_base_branch_file, update_main_with_base_branch, get_file_urls_for_testcase, upload_base_file_to_image_kit, \
+    upload_to_compare_file_to_image_kit, upload_result_file_to_image_kit
 import base64
 import json
 
@@ -13,7 +14,46 @@ def welcome():
 
 
 @app.route('/visual-validate/', methods=['POST'])
-def upload_file_for_visual_validation():
+def visual_validate():
+    tag = request.form['tag']
+    project = request.form['project']
+    branch_name = request.form['branchName']
+    test_matrix_id = request.form['testMatrixId']
+    test_case_name = request.form['testCaseName']
+    base_file_url = request.form['baseFileUrl']
+    to_compare_file_url = request.form['toCompareFileUrl']
+    device_model = request.form['deviceModel']
+    status_bar_height = request.form['statusBarHeight']
+    display_height = request.form['displayHeight']
+    display_width = request.form['displayWidth']
+
+    resp = visual_validate_image(base_file_url, to_compare_file_url, tag, project, branch_name, test_matrix_id,
+                                 test_case_name, device_model, status_bar_height, display_height,
+                                 display_width)
+    return jsonify(resp), 202
+
+
+@app.route('/upload-result-file/', methods=['POST'])
+def upload_result_file():
+    diff = request.form['diff']
+    tag = request.form['tag']
+    project = request.form['project']
+    branch_name = request.form['branchName']
+    test_matrix_id = request.form['testMatrixId']
+    test_case_name = request.form['testCaseName']
+    device_model = request.form['deviceModel']
+    status_bar_height = request.form['statusBarHeight']
+    display_height = request.form['displayHeight']
+    display_width = request.form['displayWidth']
+    to_compare_file_url = request.form['toCompareFileUrl']
+
+    return upload_result_file_to_image_kit(diff, tag, project, branch_name, test_matrix_id,
+                                           test_case_name, device_model, status_bar_height, display_height,
+                                           display_width, to_compare_file_url)
+
+
+@app.route('/upload_to_compare_file/', methods=['POST'])
+def upload_to_compare_file():
     file = request.files['file']
     image_string = base64.b64encode(file.read())
     tag = request.form['tag']
@@ -21,20 +61,37 @@ def upload_file_for_visual_validation():
     branch_name = request.form['branchName']
     test_matrix_id = request.form['testMatrixId']
     test_case_name = request.form['testCaseName']
-    base_file_url = request.form['baseFileUrl']
     device_model = request.form['deviceModel']
-    status_bar_height = request.form['statusBarHeight']
-    display_height = request.form['displayHeight']
-    display_width = request.form['displayWidth']
 
     if 'file' not in request.files:
         resp = jsonify({'message': 'No file part in the request'})
         resp.status_code = 400
         return resp
     if file and allowed_file(file.filename):
-        validation_resp = visual_validate_image(image_string, base_file_url, tag, project, branch_name, test_matrix_id,
-                                                test_case_name, device_model, status_bar_height, display_height,
-                                                display_width)
+        validation_resp = upload_to_compare_file_to_image_kit(image_string, tag, project, branch_name, test_matrix_id,
+                                                              test_case_name, device_model)
+        return validation_resp
+    else:
+        resp = jsonify({'message': 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})
+        resp.status_code = 400
+        return resp
+
+
+@app.route('/upload-base-file/', methods=['POST'])
+def upload_base_file():
+    file = request.files['file']
+    image_string = base64.b64encode(file.read())
+    tag = request.form['tag']
+    project = request.form['project']
+    test_case_name = request.form['testCaseName']
+    device_model = request.form['deviceModel']
+
+    if 'file' not in request.files:
+        resp = jsonify({'message': 'No file part in the request'})
+        resp.status_code = 400
+        return resp
+    if file and allowed_file(file.filename):
+        validation_resp = upload_base_file_to_image_kit(image_string, tag, project, test_case_name, device_model)
         print("validation_resp", validation_resp)
         return validation_resp
     else:
@@ -65,6 +122,7 @@ def upload_a_base_branch_file():
         return resp
 
 
+# gets the base file url for either the main or branch base url
 @app.route('/get_base_file_url/', methods=['POST'])
 def get_base_file():
     tag = request.form['tag']
