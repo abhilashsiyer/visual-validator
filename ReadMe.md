@@ -1,7 +1,4 @@
 
-How to deploy?
+## Visual Validator
 
-~~gcloud app deploy~~
-
-
-Delete project not avoid any billings
+A flask service that uses Open CV to determine difference between screenshots.
